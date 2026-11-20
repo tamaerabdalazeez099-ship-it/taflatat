@@ -37,7 +37,12 @@ a.dl{display:block;background:#25F4EE;color:#000;padding:15px;border-radius:10px
 </form>
 {content}
 </div>
-<div class="footer">تفلتات 2026<br><b>صنع بواسطة تامر ود الدروشاب</b><br>الدروشاب - أم درمان - السودان</div>
+<div class="footer">تفلتات 2026<br><b>صنع بواسطة تامر ود الدروشاب</b><br>الدروشاب - أم درمان - السودان</div><div style="padding:20px; text-align:center; background:#1e1e1e; border-radius:15px; margin-top:15px;">
+<h3 style="color:white;">🔥 عجبك التطبيق؟</h3>
+<p style="color:#aaa;">ثبتو وارسلو لأصحابك</p>
+<a href="https://wa.me/?text=نزل تطبيق تافلاتات 🔥 نزل اي فيديو من تيك توك بدون علامة مائية مجان: https://taflatat.onrender.com" target="_blank" style="display:block; background:#25D366; color:white; padding:14px; border-radius:12px; font-size:18px; font-weight:bold; text-decoration:none; margin-bottom:10px;">📤 شارك في الواتساب</a>
+<a href="https://www.facebook.com/sharer/sharer.php?u=https://taflatat.onrender.com" target="_blank" style="display:block; background:#1877F2; color:white; padding:14px; border-radius:12px; font-size:18px; font-weight:bold; text-decoration:none;">📘 شارك في الفيسبوك</a>
+</div>
 </body></html>
 """
 @app.route("/", methods=["GET"])
