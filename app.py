@@ -1,71 +1,68 @@
-
-
-from flask import Flask, request
+from flask import Flask, request, send_file, render_template_string
 import yt_dlp
 import os
+import uuid
+
 app = Flask(__name__)
-HTML = """
-<!DOCTYPE html>
-<html dir="rtl" lang="ar">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>تفلتات - حمل من أي موقع</title>
+
+HTML = """<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفلتات - تحميل تيك توك بدون علامة مائية</title>
 <style>
-body{font-family:sans-serif;background:#0f0f0f;color:#fff;text-align:center;padding:0;margin:0}
-.top-ad{background:#222;padding:12px;font-size:13px;color:#aaa}
-h1{color:#25F4EE;font-size:38px;margin:10px 0 0}
-h1 span{color:#FE2C55}
-.box{background:#1e1e1e;padding:20px;border-radius:16px;max-width:520px;margin:15px auto}
-input{width:92%;padding:15px;border-radius:10px;border:none;font-size:16px;text-align:center}
-button{background:#FE2C55;color:#fff;border:none;padding:15px 25px;border-radius:10px;font-size:18px;margin-top:12px;width:96%;font-weight:bold}
-select{width:96%;padding:12px;border-radius:10px;margin-top:10px;font-size:16px;text-align:center}
-video{width:100%;border-radius:12px;margin-top:15px}
-a.dl{display:block;background:#25F4EE;color:#000;padding:15px;border-radius:10px;margin-top:12px;text-decoration:none;font-weight:bold}
-.sites{font-size:13px;color:#aaa}
-.footer{padding:20px;color:#888;font-size:14px}
-.footer b{color:#fff}
-</style></head>
+body{font-family:Arial;background:#111;color:white;text-align:center;padding:20px;margin:0}
+h1{font-size:32px;margin:10px}
+h1 span{color:#25F4EE}
+.box{background:#1e1e1e;padding:20px;border-radius:20px;max-width:500px;margin:auto}
+input{width:90%;padding:15px;border-radius:12px;border:none;font-size:16px;margin:10px 0}
+button{background:#FE2C55;color:white;border:none;padding:15px 30px;border-radius:12px;font-size:18px;font-weight:bold;width:95%}
+.footer{margin-top:20px;color:#aaa;font-size:14px;line-height:1.8}
+.share{padding:20px;text-align:center;background:#1e1e1e;border-radius:15px;margin-top:15px;max-width:500px;margin-left:auto;margin-right:auto}
+</style>
+</head>
 <body>
-<div class="top-ad">مساحة إعلانية - تفلتات</div>
-<div class="box">
 <h1>تفلتات <span>🔥</span></h1>
-<p style="color:#25F4EE;font-weight:bold">حمل من أي موقع - بدون علامة مائية</p>
-<p class="sites">تيك توك - يوتيوب - انستقرام - فيسبوك - تويتر - كواي - سناب</p>
-<form method="POST" action="/get">
-<input name="url" placeholder="الصق أي رابط هنا..." required>
-<select name="type"><option value="video">تحميل فيديو</option><option value="audio">تحميل صوت MP3</option></select>
-<br><button type="submit">جلب الفيديو</button>
+<p>نزل اي فيديو من تيك توك بدون علامة مائية - مجاناً</p>
+<div class="box">
+<form method="POST" action="/download">
+<input type="text" name="url" placeholder="الصق رابط التيك توك هنا..." required>
+<br><button type="submit">⬇️ تحميل الآن</button>
 </form>
-{content}
 </div>
-<div class="footer">تفلتات 2026<br><b>صنع بواسطة تامر ود الدروشاب</b><br>الدروشاب - أم درمان - السودان</div><div style="padding:20px; text-align:center; background:#1e1e1e; border-radius:15px; margin-top:15px;">
-<h3 style="color:white;">🔥 عجبك التطبيق؟</h3>
-<p style="color:#aaa;">ثبتو وارسلو لأصحابك</p>
-<a href="https://wa.me/?text=نزل تطبيق تافلاتات 🔥 نزل اي فيديو من تيك توك بدون علامة مائية مجان: https://taflatat.onrender.com" target="_blank" style="display:block; background:#25D366; color:white; padding:14px; border-radius:12px; font-size:18px; font-weight:bold; text-decoration:none; margin-bottom:10px;">📤 شارك في الواتساب</a>
-<a href="https://www.facebook.com/sharer/sharer.php?u=https://taflatat.onrender.com" target="_blank" style="display:block; background:#1877F2; color:white; padding:14px; border-radius:12px; font-size:18px; font-weight:bold; text-decoration:none;">📘 شارك في الفيسبوك</a>
+<div class="share">
+<h3>🔥 عجبك تطبيق تفلتات؟</h3>
+<p style="color:#aaa;">ثبتو عندك وارسلو لأصحابك</p>
+<a href="https://wa.me/?text=نزل تطبيق تفلتات 🔥 صنع في السودان 🇸🇩 نزل اي فيديو من تيك توك بدون علامة مائية مجان: https://taflatat.onrender.com" target="_blank" style="display:block;background:#25D366;color:white;padding:14px;border-radius:12px;font-size:18px;font-weight:bold;text-decoration:none;margin-bottom:10px;">📤 شارك في الواتساب</a>
+<a href="https://www.facebook.com/sharer/sharer.php?u=https://taflatat.onrender.com" target="_blank" style="display:block;background:#1877F2;color:white;padding:14px;border-radius:12px;font-size:18px;font-weight:bold;text-decoration:none;">📘 شارك في الفيسبوك</a>
 </div>
-</body></html>
+<div class="footer">صنع بواسطة <b style="color:white;">تامر ود الدروشاب</b><br>صنع في السودان 🇸🇩 | الدروشاب - أم درمان<br>تفلتات © 2026</div>
+</body>
+</html>
 """
-@app.route("/", methods=["GET"])
+
+@app.route('/')
 def home():
-    return HTML.format(content="")
-@app.route("/get", methods=["POST"])
-def get_video():
-    url = request.form.get("url", "").strip()
-    typ = request.form.get("type", "video")
-    fmt = 'bestaudio/best' if typ == 'audio' else 'best'
+    return render_template_string(HTML)
+
+@app.route('/download', methods=['POST'])
+def download():
+    url = request.form.get('url')
+    if not url:
+        return "الصق الرابط اولاً"
+    filename = f"{uuid.uuid4()}.mp4"
+    ydl_opts = {'format': 'mp4', 'outtmpl': filename, 'quiet': True}
     try:
-        with yt_dlp.YoutubeDL({'quiet':True,'format':fmt,'noplaylist':True}) as ydl:
-            info = ydl.extract_info(url, download=False)
-            video_url = info.get('url')
-            title = info.get('title','فيديو')
-            thumb = info.get('thumbnail','')
-            site = info.get('extractor_key','')
-            if typ == 'audio':
-                content = f"<p>{title}</p><audio controls style='width:100%' src='{video_url}'></audio><a class='dl' href='{video_url}' download>تحميل الصوت MP3</a>"
-            else:
-                content = f"<p>{title}</p><p>من : {site}</p><video controls poster='{thumb}' src='{video_url}'></video><a class='dl' href='{video_url}' download>تحميل الفيديو</a>"
-            return HTML.format(content=content)
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+        return send_file(filename, as_attachment=True, download_name="taflatat.mp4")
     except Exception as e:
-        return HTML.format(content="<p>ما قدرنا نجيب الرابط دا، حاول تاني</p>")
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+        return f"حصل خطأ، جرب رابط تاني: {e}"
+    finally:
+        if os.path.exists(filename):
+            try: os.remove(filename)
+            except: pass
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=10000)
