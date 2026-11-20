@@ -1,68 +1,16 @@
-from flask import Flask, request, send_file, render_template_string
-import yt_dlp
-import os
-import uuid
-
+from flask import Flask, request, jsonify, render_template_string
+import yt_dlp, os
 app = Flask(__name__)
-
-HTML = """<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تفلتات - تحميل تيك توك بدون علامة مائية</title>
-<style>
-body{font-family:Arial;background:#111;color:white;text-align:center;padding:20px;margin:0}
-h1{font-size:32px;margin:10px}
-h1 span{color:#25F4EE}
-.box{background:#1e1e1e;padding:20px;border-radius:20px;max-width:500px;margin:auto}
-input{width:90%;padding:15px;border-radius:12px;border:none;font-size:16px;margin:10px 0}
-button{background:#FE2C55;color:white;border:none;padding:15px 30px;border-radius:12px;font-size:18px;font-weight:bold;width:95%}
-.footer{margin-top:20px;color:#aaa;font-size:14px;line-height:1.8}
-.share{padding:20px;text-align:center;background:#1e1e1e;border-radius:15px;margin-top:15px;max-width:500px;margin-left:auto;margin-right:auto}
-</style>
-</head>
-<body>
-<h1>تفلتات <span>🔥</span></h1>
-<p>نزل اي فيديو من تيك توك بدون علامة مائية - مجاناً</p>
-<div class="box">
-<form method="POST" action="/download">
-<input type="text" name="url" placeholder="الصق رابط التيك توك هنا..." required>
-<br><button type="submit">⬇️ تحميل الآن</button>
-</form>
-</div>
-<div class="share">
-<h3>🔥 عجبك تطبيق تفلتات؟</h3>
-<p style="color:#aaa;">ثبتو عندك وارسلو لأصحابك</p>
-<a href="https://wa.me/?text=نزل تطبيق تفلتات 🔥 صنع في السودان 🇸🇩 نزل اي فيديو من تيك توك بدون علامة مائية مجان: https://taflatat.onrender.com" target="_blank" style="display:block;background:#25D366;color:white;padding:14px;border-radius:12px;font-size:18px;font-weight:bold;text-decoration:none;margin-bottom:10px;">📤 شارك في الواتساب</a>
-<a href="https://www.facebook.com/sharer/sharer.php?u=https://taflatat.onrender.com" target="_blank" style="display:block;background:#1877F2;color:white;padding:14px;border-radius:12px;font-size:18px;font-weight:bold;text-decoration:none;">📘 شارك في الفيسبوك</a>
-</div>
-<div class="footer">صنع بواسطة <b style="color:white;">تامر ود الدروشاب</b><br>صنع في السودان 🇸🇩 | الدروشاب - أم درمان<br>تفلتات © 2026</div>
-</body>
-</html>
-"""
-
+HTML = """<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>تفلتات - حمل من كل التطبيقات</title><style>body{background:#111;color:white;font-family:sans-serif;text-align:center;padding:20px}h1{font-size:42px}input{width:92%;max-width:500px;padding:15px;border-radius:15px;border:none;font-size:16px;text-align:center}button{background:#ff2d55;color:white;border:none;padding:15px 30px;border-radius:15px;font-size:18px;font-weight:bold;margin-top:15px;width:92%;max-width:500px}span{background:#222;padding:10px 15px;border-radius:20px;display:inline-block;margin:5px}a.dl{display:block;background:#00c853;color:white;padding:15px;border-radius:15px;text-decoration:none;font-weight:bold;margin-top:10px}video{width:100%;max-width:500px;border-radius:15px}</style></head><body><h1>تفلتات 🔥</h1><p>حمل من كل التطبيقات بدون علامة مائية</p><div><span>🎵 تيك توك</span><span>📘 فيسبوك</span><span>📸 انستقرام</span><span>▶️ يوتيوب</span><span>🐦 تويتر</span></div><br><input id="url" placeholder="الصق رابط الفيديو هنا..."><br><button onclick="dl()">تحميل الآن ⬇️</button><div id="result"></div><button onclick="shareApp()" style="background:#25D366">شارك تفلتات في الواتساب 📤</button><p style="margin-top:30px">صنع بواسطة تامر ود الدروشاب<br>صنع في السودان 🇸🇩</p><script>async function dl(){let url=document.getElementById('url').value;if(!url) return alert('الصق الرابط اول');document.getElementById('result').innerHTML='جاري التحميل... ⏳';let r=await fetch('/download',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:url})});let d=await r.json();if(d.error) document.getElementById('result').innerHTML='❌ '+d.error;else document.getElementById('result').innerHTML='<video src="'+d.video_url+'" controls></video><a class="dl" href="'+d.video_url+'" download>حفظ الفيديو 📥</a><p>'+d.title+'</p>';}function shareApp(){let t='جرب تفلتات 🔥 حمل من تيك توك وفيسبوك وانستقرام ويوتيوب بدون علامة مائية - '+window.location.href;window.open('https://wa.me/?text='+encodeURIComponent(t));}</script></body></html>"""
 @app.route('/')
-def home():
-    return render_template_string(HTML)
-
+def home(): return render_template_string(HTML)
 @app.route('/download', methods=['POST'])
 def download():
-    url = request.form.get('url')
-    if not url:
-        return "الصق الرابط اولاً"
-    filename = f"{uuid.uuid4()}.mp4"
-    ydl_opts = {'format': 'mp4', 'outtmpl': filename, 'quiet': True}
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
-        return send_file(filename, as_attachment=True, download_name="taflatat.mp4")
-    except Exception as e:
-        return f"حصل خطأ، جرب رابط تاني: {e}"
-    finally:
-        if os.path.exists(filename):
-            try: os.remove(filename)
-            except: pass
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)
+ url=request.json.get('url','')
+ try:
+  ydl_opts={'format':'best','quiet':True,'noplaylist':True}
+  with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+   info=ydl.extract_info(url, download=False)
+   return jsonify({"title":info.get('title','تفلتات'),"video_url":info.get('url')})
+ except Exception as e: return jsonify({"error":"الرابط ما اتعرف، جرب رابط تاني"})
+if __name__=='__main__': app.run(host='0.0.0.0', port=int(os.environ.get('PORT',10000)))
