@@ -2,6 +2,9 @@ from flask import Flask, render_template_string, jsonify, request, redirect
 import os
 app = Flask(__name__)
 
+# دي صورتك انت الفخمة - خلاص جاهزة
+HERO_URL = "https://raw.githubusercontent.com/tamaerabdalazeez099/taflatat/main/Messenger_creation_1050237001420020.jpeg"
+
 HTML = """
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -13,36 +16,8 @@ HTML = """
 * { margin:0; padding:0; box-sizing:border-box; font-family: Tahoma; }
 body { background:#000; color:#fff; }
 .phone { max-width:520px; margin:0 auto; background:#111; min-height:100vh; padding:12px; padding-bottom:90px; }
-
-/* ===== الصورة الفوق - صورة السودان الشديدة ===== */
-.hero {
-  height: 250px;
-  border-radius: 18px;
-  overflow: hidden;
-  position: relative;
-  border: 3px solid #FFD700;
-  background-image: url('https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=1000&q=80');
-  background-size: cover;
-  background-position: center;
-  margin-bottom: 5px;
-}
-.hero::after {
-  content:''; position:absolute; inset:0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.15), rgba(0,0,0,0.75));
-}
-.hero-top-img {
-  position:absolute; top:0; left:0; right:0; height:110px;
-  background-image: url('https://images.unsplash.com/photo-1547235001-d703406d3f17?w=1000&q=80');
-  background-size: cover; background-position: center;
-  border-bottom: 3px solid #FFD700;
-  z-index:1;
-}
-.hero-content { position:relative; z-index:2; text-align:center; padding-top:125px; }
-.hero-content h1 { font-size:62px; color:#FFD700; line-height:1; text-shadow: 3px 3px 0 #D21034, 0 0 25px #FFD700; }
-.hero-content h2 { font-size:36px; color:#fff; letter-spacing:3px; text-shadow:2px 2px 0 #000; }
-.hero-content .flag { font-size:20px; margin-top:4px; }
-.hero-content p { font-size:13px; margin-top:5px; color:#FFE680; font-weight:bold; text-shadow:1px 1px 0 #000; }
-
+.hero { border:3px solid #FFD700; border-radius:18px; overflow:hidden; margin-bottom:5px; }
+.hero img { width:100%; display:block; }
 .sudan-bar { display:flex; height:8px; border-radius:10px; overflow:hidden; margin:12px 0; border:1px solid #FFD700; }
 .sudan-bar div { flex:1; } .c1{background:#D21034} .c2{background:#fff} .c3{background:#000} .c4{background:#007A3D}
 .search-box { background:#fff; margin:12px 0 8px; border-radius:14px; padding:14px; display:flex; gap:8px; align-items:center; border:3px solid #FFD700; }
@@ -71,18 +46,7 @@ body { background:#000; color:#fff; }
 </head>
 <body>
 <div class="phone">
-
-<!-- ===== هنا الصورة الفوق - ما مسحنا أي حاجة ===== -->
-<div class="hero">
-  <div class="hero-top-img"></div>
-  <div class="hero-content">
-    <h1>تفلتات</h1>
-    <h2>TAFLTAT</h2>
-    <div class="flag">🇸🇩 🇸🇩 🇸🇩</div>
-    <p>فيديوهات سودانية • كوميديا • موسيقى • كرة قدم</p>
-  </div>
-</div>
-
+<div class="hero"><img src="__HERO__"></div>
 <div class="sudan-bar"><div class="c1"></div><div class="c2"></div><div class="c3"></div><div class="c4"></div></div>
 <div class="search-box">🔍 <input id="searchInput" placeholder="اكتب أي حاجة هنا... ح تظهر طوالي جوة" autocomplete="off"></div>
 <div class="hint">✍️ اكتب بس... شوف أول، بعدين حمل</div>
@@ -129,7 +93,7 @@ document.getElementById('searchInput').addEventListener('input', function(){ cle
 </script>
 </body>
 </html>
-"""
+""".replace("__HERO__", HERO_URL)
 
 @app.route('/')
 def home():
